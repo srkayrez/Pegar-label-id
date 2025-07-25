@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>Buscar LabelID</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+    textarea {
+      width: 100%;
+      box-sizing: border-box;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      margin-right: 10px;
+    }
+    pre {
+      background: #f4f4f4;
+      padding: 10px;
+      white-space: pre-wrap;
+    }
+    .resultado-container {
+      display: flex;
+      gap: 40px; 
+    }
+    .resultado-bloco {
+      flex: 1; 
+    }
+  </style>
+</head>
+<body>
+  <h1>Buscar LabelID</h1>
+
+  <h3>1️ Cole seu JSON COMPLETO:</h3>
+  <textarea id="jsonInput" rows="15" placeholder='Cole aqui o objeto JSON completo'></textarea>
+
+  <h3>2️ Cole as tags (uma por linha):</h3>
+  <textarea id="tagsInput" rows="10" placeholder='Cole aqui as tags, uma por linha'></textarea>
+
+  <br><br>
+  <button onclick="buscarLabelIds()">Buscar Label IDs</button>
+
+  <h3>Resultado:</h3>
+
+  <div class="resultado-container">
+    <div class="resultado-bloco">
+      <strong>Tags:</strong>
+      <pre id="tagsResultado"></pre>
+    </div>
+    <div class="resultado-bloco">
+      <strong>Label IDs:</strong>
+      <pre id="idsResultado"></pre>
+      <button onclick="copiarLabelIds()">Copiar Label IDs Formatados</button>
+    </div>
+  </div>
+
+  <script>
+    function buscarLabelIds() {
+      const jsonText = document.getElementById('jsonInput').value;
+      const tagsText = document.getElementById('tagsInput').value;
+
+      let objeto = {};
+      try {
+        objeto = JSON.parse(jsonText);
+      } catch (e) {
+        alert('JSON inválido!');
+        return;
+      }
+
+      if (!objeto.labels || !Array.isArray(objeto.labels)) {
+        alert('O JSON deve conter a propriedade "labels" como array!');
+        return;
+      }
+
+      const tags = tagsText.split('\n').map(tag => tag.trim()).filter(tag => tag);
+
+      const tagsSaida = [];
+      const idsSaida = [];
+
+      tags.forEach(tag => {
+        const encontrado = objeto.labels.find(label => label.name === tag);
+        tagsSaida.push(tag);
+        idsSaida.push(encontrado ? encontrado.labelId : 'NÃO ENCONTRADO');
+      });
+
+      document.getElementById('tagsResultado').textContent = tagsSaida.join('\n');
+      document.getElementById('idsResultado').textContent = idsSaida.join('\n');
+    }
+
+    function copiarLabelIds() {
+  const idsText = document.getElementById('idsResultado').textContent;
+  const ids = idsText.split('\n').map(id => id.trim()).filter(id => id && id !== 'NÃO ENCONTRADO');
+  const formatado = ids.map(id => `"${id}",`).join('\n');
+  navigator.clipboard.writeText(formatado)
+    .then(() => {
+      alert('Label IDs copiados no formato desejado!');
+    })
+    .catch(err => {
+      alert('Erro ao copiar: ' + err);
+    });
+}
+
+  </script>
+</body>
+</html>
